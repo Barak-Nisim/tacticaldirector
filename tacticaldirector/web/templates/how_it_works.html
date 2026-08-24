@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}How TacticalDirector works{% endblock %}
+{% block content %}
+
+<section class="page-header">
+  <p class="eyebrow">Methodology</p>
+  <h1>How TacticalDirector works</h1>
+  <p class="hero-sub">
+    Every step below is real: the same code that renders this page runs the scoring engine and,
+    if you enable it, the AI layer. Nothing here is a marketing simplification of something
+    different happening under the hood.
+  </p>
+</section>
+
+<section class="method-steps">
+
+  <div class="method-step reveal">
+    <span class="method-num">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="16" rx="2"/><path d="M9 4V3a1 1 0 011-1h4a1 1 0 011 1v1"/><path d="M9 10h6M9 14h6M9 18h3"/></svg>
+    </span>
+    <div>
+      <h2>Describe the encounter</h2>
+      <p>
+        You provide one round of combat: your character (an <strong>archetype</strong> of warrior,
+        mage, skirmisher, or support, plus current and max HP and a limited resource pool), the
+        enemies present (name and a 1&ndash;5 threat tier each), and terrain flags (high ground,
+        cover, hazard). That's the entire input; there's no hidden state carried between rounds.
+      </p>
+    </div>
+  </div>
+
+  <div class="method-step reveal">
+    <span class="method-num">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 5-3.5 8.5-7 9-3.5-.5-7-4-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+    </span>
+    <div>
+      <h2>Four actions, scored against four categories</h2>
+      <p>
+        <strong>Attack</strong>, <strong>Use Ability</strong>, <strong>Defend</strong>, and
+        <strong>Retreat</strong> are each scored 0&ndash;4 across <strong>Offensive Value</strong>,
+        <strong>Survival Risk</strong>, <strong>Resource Efficiency</strong>, and
+        <strong>Positional Advantage</strong>. For example, Retreat scores a 4 on Survival Risk
+        only once HP drops below 35%; Use Ability's Resource Efficiency depends on how much of the
+        resource pool remains versus how threatening the encounter actually is, so spending your
+        last resource on a weak encounter scores a 0, while spending it on a genuinely dangerous
+        one scores a 4. Every rule is fixed and documented; nothing is learned or guessed.
+      </p>
+    </div>
+  </div>
+
+  <div class="method-step reveal">
+    <span class="method-num">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg>
+    </span>
+    <div>
+      <h2>Averaged and ranked, highest first</h2>
+      <p>
+        An action's overall score is the plain average of its four category scores, mapped onto a
+        tier from Poor to Optimal. All four actions are always shown, ranked highest to lowest;
+        the tool never hides an option or forces a single pick. You can recompute every number by
+        hand from the category scores and reasons on the report.
+      </p>
+    </div>
+  </div>
+
+  <div class="method-step reveal">
+    <span class="method-num">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2z"/></svg>
+    </span>
+    <div>
+      <h2>AI narrates. It never re-scores.</h2>
+      <p>
+        When AI narration is enabled, Claude receives the already-ranked actions and their
+        category scores as structured data and is explicitly instructed to narrate the top
+        recommendation and add a line of "table talk" flavor, not to recompute or reorder
+        anything, and not to invent enemies or rules that weren't given to it. If you disagree
+        with a ranking, the fix is in the scoring rules above, not in the AI layer. The
+        deterministic core works, and is fully tested, with zero dependency on any AI service.
+      </p>
+    </div>
+  </div>
+
+</section>
+
+<section class="method-detail-link">
+  <div class="detail-card reveal">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+    <p>
+      Want the full math, including every scoring rule and tier boundary? It's documented in the
+      repo: <a href="https://github.com/Barak-Nisim/tacticaldirector/blob/main/docs/scoring_methodology.md">scoring methodology</a>
+      and <a href="https://github.com/Barak-Nisim/tacticaldirector/blob/main/docs/architecture.md">architecture</a>.
+    </p>
+  </div>
+</section>
+
+<section class="final-cta">
+  <h2>See it score a real encounter.</h2>
+  <a href="/app" class="btn btn-primary btn-large">Try the live demo</a>
+</section>
+
+{% endblock %}

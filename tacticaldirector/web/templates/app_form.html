@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}TacticalDirector: Live demo{% endblock %}
+{% block content %}
+<div class="container app-form-page">
+  <p class="demo-banner">This is the live demo. A sample encounter is pre-filled below. Edit anything and run it, or use it as-is. <a href="/">&larr; Back to overview</a></p>
+
+  <h1>Set up an encounter</h1>
+  <p class="subtitle">Scored deterministically, in your browser, on your machine.</p>
+
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="/advise">
+    <div class="form-section">
+      <h2>Character</h2>
+      <div class="field-grid">
+        <div>
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" value="{{ character.name }}">
+        </div>
+        <div>
+          <label for="archetype">Archetype</label>
+          <select id="archetype" name="archetype">
+            {% for a in archetypes %}
+            <option value="{{ a }}" {% if character.archetype == a %}selected{% endif %}>{{ a|capitalize }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="level">Level</label>
+          <input type="number" id="level" name="level" min="1" value="{{ character.level }}">
+        </div>
+        <div>
+          <label for="hp_current">Current HP</label>
+          <input type="number" id="hp_current" name="hp_current" min="0" value="{{ character.hp_current }}">
+        </div>
+        <div>
+          <label for="hp_max">Max HP</label>
+          <input type="number" id="hp_max" name="hp_max" min="1" value="{{ character.hp_max }}">
+        </div>
+        <div>
+          <label for="resources_current">Resources remaining</label>
+          <input type="number" id="resources_current" name="resources_current" min="0" value="{{ character.resources_current }}">
+        </div>
+        <div>
+          <label for="resources_max">Resources max</label>
+          <input type="number" id="resources_max" name="resources_max" min="0" value="{{ character.resources_max }}">
+        </div>
+        <div>
+          <label for="round_number">Round number</label>
+          <input type="number" id="round_number" name="round_number" min="1" value="{{ round_number }}">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h2>Enemies</h2>
+      <p class="hint">Leave a name blank to skip that slot. Threat tier: 1 (trivial) to 5 (deadly).</p>
+      {% for i in range(5) %}
+      {% set enemy = enemies[i] if i < enemies|length else None %}
+      <div class="enemy-row">
+        <div>
+          <label for="enemy_name_{{ i }}">Enemy {{ i + 1 }} name</label>
+          <input type="text" id="enemy_name_{{ i }}" name="enemy_name_{{ i }}" value="{{ enemy.name if enemy else '' }}">
+        </div>
+        <div>
+          <label for="enemy_threat_{{ i }}">Threat tier</label>
+          <select id="enemy_threat_{{ i }}" name="enemy_threat_{{ i }}">
+            {% for t in range(1, 6) %}
+            <option value="{{ t }}" {% if enemy and enemy.threat_tier == t %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="form-section">
+      <h2>Terrain</h2>
+      <div class="terrain-flags">
+        <label class="checkbox">
+          <input type="checkbox" name="high_ground" value="1" {% if terrain.high_ground %}checked{% endif %}>
+          High ground
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="cover" value="1" {% if terrain.cover %}checked{% endif %}>
+          Cover
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="hazard" value="1" {% if terrain.hazard %}checked{% endif %}>
+          Hazard
+        </label>
+      </div>
+    </div>
+
+    <div class="controls">
+      <label class="checkbox">
+        <input type="checkbox" name="use_ai" value="1" {% if not ai_available %}disabled{% endif %}>
+        Include Game Master's take
+        {% if not ai_available %}
+          <span class="hint">(set ANTHROPIC_API_KEY to enable)</span>
+        {% endif %}
+      </label>
+      <button type="submit">Rank my options</button>
+    </div>
+    <p class="field-caption">Scores Attack, Use Ability, Defend, and Retreat against four categories, and renders the ranked report below. With the Game Master's take on, Claude also adds a short narration and a line of table talk.</p>
+  </form>
+</div>
+{% endblock %}
