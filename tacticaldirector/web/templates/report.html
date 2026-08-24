@@ -3,63 +3,79 @@
 {% block content %}
 <div class="container">
   <p><a href="/app">&larr; Back to demo</a></p>
-  <h1>The Codex Speaks</h1>
-  <h2>{{ result.encounter.character.name }}, {{ result.encounter.character.archetype|capitalize }} (level {{ result.encounter.character.level }})</h2>
 
-  <dl class="meta">
-    <dt>HP</dt>
-    <dd>
-      <span class="hp-bar-track"><span class="hp-bar-fill" style="width: {{ (result.encounter.character.hp_pct * 100)|round|int }}%"></span></span>
-      {{ result.encounter.character.hp_current }} / {{ result.encounter.character.hp_max }}
-    </dd>
-    <dt>Resources</dt><dd>{{ result.encounter.character.resources_current }} / {{ result.encounter.character.resources_max }}</dd>
-    <dt>Enemies</dt>
-    <dd>
-      {% if result.encounter.enemies %}
-        {% for e in result.encounter.enemies %}{{ e.name }} (tier {{ e.threat_tier }}){% if not loop.last %}, {% endif %}{% endfor %}
-      {% else %}
-        None
-      {% endif %}
-    </dd>
-    <dt>Terrain</dt>
-    <dd>
-      {% set flags = [] %}
-      {% if result.encounter.terrain.high_ground %}{% set _ = flags.append("High ground") %}{% endif %}
-      {% if result.encounter.terrain.cover %}{% set _ = flags.append("Cover") %}{% endif %}
-      {% if result.encounter.terrain.hazard %}{% set _ = flags.append("Hazard") %}{% endif %}
-      {{ flags|join(", ") if flags else "None" }}
-    </dd>
-    <dt>Round</dt><dd>{{ result.encounter.round_number }}</dd>
-  </dl>
+  <div class="report-card">
+    <h1>The Codex Speaks</h1>
+    <h2>{{ result.encounter.character.name }}, {{ result.encounter.character.archetype|capitalize }} (level {{ result.encounter.character.level }})</h2>
 
-  <h3>The Codex's Verdict</h3>
-  {% for action in result.ranked_actions %}
-  <details class="action-card" {% if loop.first %}open{% endif %}>
-    <summary>
-      <span class="rank-badge">{{ loop.index }}</span>
-      {{ action.label }}
-      <span class="action-tier">{{ "%.2f"|format(action.overall_score) }} / 4.0 &middot; {{ action.tier }}</span>
-    </summary>
-    <div class="category-list">
-      {% for cat in action.category_scores %}
-      <div class="category-row">
-        <span class="category-label">{{ cat.label }}</span>
-        <span class="category-score">{{ cat.score }}/4</span>
-        <p class="category-reason">{{ cat.reason }}</p>
+    <dl class="meta">
+      <dt>HP</dt>
+      <dd>
+        <span class="hp-bar-track"><span class="hp-bar-fill" style="width: {{ (result.encounter.character.hp_pct * 100)|round|int }}%"></span></span>
+        {{ result.encounter.character.hp_current }} / {{ result.encounter.character.hp_max }}
+      </dd>
+      <dt>Resources</dt><dd>{{ result.encounter.character.resources_current }} / {{ result.encounter.character.resources_max }}</dd>
+      <dt>Enemies</dt>
+      <dd>
+        {% if result.encounter.enemies %}
+          {% for e in result.encounter.enemies %}{{ e.name }} (tier {{ e.threat_tier }}){% if not loop.last %}, {% endif %}{% endfor %}
+        {% else %}
+          None
+        {% endif %}
+      </dd>
+      <dt>Terrain</dt>
+      <dd>
+        {% set flags = [] %}
+        {% if result.encounter.terrain.high_ground %}{% set _ = flags.append("High ground") %}{% endif %}
+        {% if result.encounter.terrain.cover %}{% set _ = flags.append("Cover") %}{% endif %}
+        {% if result.encounter.terrain.hazard %}{% set _ = flags.append("Hazard") %}{% endif %}
+        {{ flags|join(", ") if flags else "None" }}
+      </dd>
+      <dt>Round</dt><dd>{{ result.encounter.round_number }}</dd>
+    </dl>
+
+    {% set top = result.ranked_actions[0] %}
+    <div class="top-pick-panel">
+      {% for cat in top.category_scores %}
+      <div class="top-pick-stat">
+        <span class="tp-label">{{ cat.label }}</span>
+        <span class="tp-score">{{ cat.score }}/4</span>
       </div>
       {% endfor %}
     </div>
-  </details>
-  {% endfor %}
 
-  {% if ai_narrative %}
-  <div class="gm-take">
-    <h2>Game Master's take</h2>
-    <p>{{ ai_narrative.narration }}</p>
-    <p class="table-talk">{{ ai_narrative.table_talk }}</p>
-    <p><strong>On the lowest-ranked option:</strong> {{ ai_narrative.lowest_ranked_note }}</p>
+    <h3>The Codex's Verdict</h3>
+    {% for action in result.ranked_actions %}
+    <details class="action-card" {% if loop.first %}open{% endif %}>
+      <summary>
+        <span class="rank-badge">{{ loop.index }}</span>
+        {{ action.label }}
+        <span class="action-tier">
+          {{ "%.2f"|format(action.overall_score) }} / 4.0
+          <span class="tier-pill tier-{{ action.tier|lower }}">{{ action.tier }}</span>
+        </span>
+      </summary>
+      <div class="category-list">
+        {% for cat in action.category_scores %}
+        <div class="category-row">
+          <span class="category-label">{{ cat.label }}</span>
+          <span class="category-score">{{ cat.score }}/4</span>
+          <p class="category-reason">{{ cat.reason }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </details>
+    {% endfor %}
+
+    {% if ai_narrative %}
+    <div class="gm-take">
+      <h2>Game Master's take</h2>
+      <p>{{ ai_narrative.narration }}</p>
+      <p class="table-talk">{{ ai_narrative.table_talk }}</p>
+      <p><strong>On the lowest-ranked option:</strong> {{ ai_narrative.lowest_ranked_note }}</p>
+    </div>
+    {% endif %}
   </div>
-  {% endif %}
 
   <details class="yaml-view">
     <summary>View as YAML (engineering view)</summary>

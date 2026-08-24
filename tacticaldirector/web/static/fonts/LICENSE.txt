@@ -1,0 +1,13 @@
+Fonts in this directory are self-hosted (no CDN) to keep the app fully
+self-contained, and are used under the SIL Open Font License, Version 1.1:
+https://openfontlicense.org
+
+Cinzel by Natanael Gama, sourced from Google Fonts
+(https://fonts.google.com/specimen/Cinzel).
+
+Lora by Cyreal, sourced from Google Fonts
+(https://fonts.google.com/specimen/Lora).
+
+Both are redistributable and embeddable under the OFL. No attribution
+is required within the rendered app; this notice is kept here for
+license traceability.
