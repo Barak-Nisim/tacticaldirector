@@ -4,8 +4,8 @@
 <div class="container app-form-page">
   <p class="demo-banner">This is the live demo. A sample encounter is pre-filled below. Edit anything and run it, or use it as-is. <a href="/">&larr; Back to overview</a></p>
 
-  <h1>Set up an encounter</h1>
-  <p class="subtitle">Scored deterministically, in your browser, on your machine.</p>
+  <h1>Describe your encounter</h1>
+  <p class="subtitle">The Codex scores it deterministically, in your browser, on your machine.</p>
 
   {% if error %}
     <div class="error">{{ error }}</div>
@@ -102,7 +102,7 @@
           <span class="hint">(set ANTHROPIC_API_KEY to enable)</span>
         {% endif %}
       </label>
-      <button type="submit">Rank my options</button>
+      <button type="submit">Consult the Codex</button>
     </div>
     <p class="field-caption">Scores Attack, Use Ability, Defend, and Retreat against four categories, and renders the ranked report below. With the Game Master's take on, Claude also adds a short narration and a line of table talk.</p>
   </form>

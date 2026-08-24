@@ -3,11 +3,15 @@
 {% block content %}
 <div class="container">
   <p><a href="/app">&larr; Back to demo</a></p>
-  <h1>Tactical Recommendation</h1>
+  <h1>The Codex Speaks</h1>
   <h2>{{ result.encounter.character.name }}, {{ result.encounter.character.archetype|capitalize }} (level {{ result.encounter.character.level }})</h2>
 
   <dl class="meta">
-    <dt>HP</dt><dd>{{ result.encounter.character.hp_current }} / {{ result.encounter.character.hp_max }}</dd>
+    <dt>HP</dt>
+    <dd>
+      <span class="hp-bar-track"><span class="hp-bar-fill" style="width: {{ (result.encounter.character.hp_pct * 100)|round|int }}%"></span></span>
+      {{ result.encounter.character.hp_current }} / {{ result.encounter.character.hp_max }}
+    </dd>
     <dt>Resources</dt><dd>{{ result.encounter.character.resources_current }} / {{ result.encounter.character.resources_max }}</dd>
     <dt>Enemies</dt>
     <dd>
@@ -28,7 +32,7 @@
     <dt>Round</dt><dd>{{ result.encounter.round_number }}</dd>
   </dl>
 
-  <h3>Ranked actions</h3>
+  <h3>The Codex's Verdict</h3>
   {% for action in result.ranked_actions %}
   <details class="action-card" {% if loop.first %}open{% endif %}>
     <summary>

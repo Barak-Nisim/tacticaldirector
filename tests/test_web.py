@@ -38,8 +38,9 @@ def test_landing_page_shows_marketing_content():
 
     assert response.status_code == 200
     assert "TacticalDirector" in response.text
-    assert "Try the live demo" in response.text
+    assert "Consult the Codex" in response.text
     assert "How it works" in response.text
+    assert "Warrior" in response.text and "Mage" in response.text
     assert 'name="hp_current"' not in response.text
 
 
@@ -65,9 +66,9 @@ def test_advise_renders_ranked_report_from_structured_form():
     response = client.post("/advise", data=_sample_form_data())
 
     assert response.status_code == 200
-    assert "Tactical Recommendation" in response.text
+    assert "The Codex Speaks" in response.text
     assert SAMPLE_ENCOUNTER.character.name in response.text
-    assert "Ranked actions" in response.text
+    assert "The Codex's Verdict" in response.text
     assert "2.75 / 4.0" in response.text
     # no AI requested -> no Game Master's take section
     assert "gm-take" not in response.text
@@ -90,7 +91,7 @@ def test_advise_with_no_enemies_still_scores():
 
     assert response.status_code == 200
     assert "Solo" in response.text
-    assert "Ranked actions" in response.text
+    assert "The Codex's Verdict" in response.text
 
 
 def test_advise_ai_checkbox_ignored_without_api_key(monkeypatch):
