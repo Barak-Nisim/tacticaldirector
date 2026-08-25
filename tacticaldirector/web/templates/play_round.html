@@ -44,11 +44,18 @@
     {% if session.status == "in_progress" %}
     <h3>The Codex's Verdict</h3>
     {% for action in result.ranked_actions %}
+    {% set d = deltas[loop.index0] if deltas else none %}
     <div class="ranked-row">
       <span class="rank-badge">{{ loop.index }}</span>
       <strong>{{ action.label }}</strong>
+      {% if d and d.rank_change and d.rank_change > 0 %}
+      <span class="alignment-tag alignment-good">&uarr; from #{{ d.previous_rank }}</span>
+      {% elif d and d.rank_change and d.rank_change < 0 %}
+      <span class="alignment-tag alignment-evil">&darr; from #{{ d.previous_rank }}</span>
+      {% endif %}
       <span class="action-tier">
         {{ "%.2f"|format(action.overall_score) }} / 4.0
+        {% if d and d.score_change %}({{ "%+.2f"|format(d.score_change) }}){% endif %}
         <span class="tier-pill tier-{{ action.tier|lower }}">{{ action.tier }}</span>
       </span>
     </div>

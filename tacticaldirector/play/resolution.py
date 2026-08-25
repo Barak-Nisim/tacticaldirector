@@ -196,6 +196,7 @@ def resolve_round(
         action=action,
         label=ACTION_LABELS[action],
         top_recommended_action=result.ranked_actions[0].action,
+        scores_by_action={a.action: a.overall_score for a in result.ranked_actions},
         roll=adjusted_roll,
         target_number=target,
         outcome_tier=outcome_tier,

@@ -11,6 +11,7 @@ from pathlib import Path
 from tacticaldirector.loader import load_encounter
 from tacticaldirector.models import ACTION_LABELS
 from tacticaldirector.play.after_action import build_after_action_report, render_after_action_report
+from tacticaldirector.play.delta import build_deltas
 from tacticaldirector.play.resolution import resolve_round
 from tacticaldirector.play.scenarios import list_scenarios
 from tacticaldirector.play.session import save_session, start_session
@@ -101,6 +102,20 @@ def _format_outcome(outcome) -> str:
     return "\n".join(lines)
 
 
+def _format_deltas(deltas) -> str:
+    changed = [d for d in deltas if d.rank_change]
+    if not changed:
+        return ""
+    lines = ["Since last round:"]
+    for d in changed:
+        direction = "up" if d.rank_change > 0 else "down"
+        lines.append(
+            f"  {d.label} moved {direction} from #{d.previous_rank} to #{d.current_rank}"
+            f" ({d.score_change:+.2f})"
+        )
+    return "\n".join(lines) + "\n"
+
+
 def _run_play(args: argparse.Namespace) -> int:
     encounter = load_encounter(args.scenario)
     scenario_id = Path(args.scenario).stem
@@ -115,6 +130,11 @@ def _run_play(args: argparse.Namespace) -> int:
 
     while session.status == "in_progress":
         result = score_encounter(session.encounter)
+        previous_outcome = session.round_log[-1] if session.round_log else None
+        if previous_outcome is not None:
+            delta_text = _format_deltas(build_deltas(result, previous_outcome))
+            if delta_text:
+                print(delta_text)
         print(render(result))
 
         if script is not None:

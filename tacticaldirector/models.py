@@ -132,6 +132,7 @@ class RoundOutcome:
     action: str  # one of ACTION_LABELS
     label: str
     top_recommended_action: str  # the Codex's #1 pick this round, one of ACTION_LABELS
+    scores_by_action: dict[str, float]  # every action's overall_score this round, for deltas
     roll: int
     target_number: int
     outcome_tier: str  # one of OUTCOME_TIERS
