@@ -60,3 +60,7 @@ Deliberately deferred out of Play Mode v1 (see [`play_mode.md`](play_mode.md) fo
 35. **[Moderate]** Play Mode-specific difficulty presets (an easier or harder target-number curve), distinct from the general scoring-threshold preset idea above.
 36. **[Minor]** A visible seed input on the web scenario-start form; currently only reachable via the CLI's `--seed` flag or a hidden form field.
 37. **[Moderate]** A shared RNG-advancement strategy between the CLI and web UI (e.g. persisting `random.getstate()` in the session file) so the same seed reproduces identical results on both surfaces, resolving the documented divergence in `play_mode.md`.
+
+## Bigger bets (real architecture decisions, plan formally before building)
+
+38. **[Major]** Build-aware recommendations: weapons, abilities, armor, cooldowns, status effects, and resistances materially changing what the Codex recommends, not just HP/resources/terrain/threat tier. This is a real expansion of `scoring.py` itself (currently deliberately minimal), not an additive module like everything else built so far -- needs a scoring-model redesign, not just new data fields.
