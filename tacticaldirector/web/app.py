@@ -8,15 +8,20 @@ no scoring or narration logic lives here. Run locally with
 from __future__ import annotations
 
 import os
+import random
+from dataclasses import replace
 from pathlib import Path
 
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from tacticaldirector.loader import dump_encounter, load_encounter
 from tacticaldirector.models import ARCHETYPES, Character, Encounter, Enemy, Terrain
+from tacticaldirector.play.resolution import resolve_round
+from tacticaldirector.play.scenarios import list_scenarios, scenario_path
+from tacticaldirector.play.session import load_session, save_session, start_session
 from tacticaldirector.scoring import score_encounter
 
 WEB_DIR = Path(__file__).parent
@@ -144,3 +149,61 @@ async def advise(
             "encounter_yaml": encounter_yaml,
         },
     )
+
+
+@app.get("/play", response_class=HTMLResponse)
+def play_scenarios(request: Request):
+    return templates.TemplateResponse(
+        request, "play_scenarios.html", {"scenarios": list_scenarios()}
+    )
+
+
+@app.post("/play/start")
+def play_start(scenario: str = Form(...), seed: str | None = Form(None)):
+    encounter = load_encounter(scenario_path(scenario))
+    seed_value = int(seed) if seed else random.SystemRandom().randrange(1_000_000)
+    session = start_session(scenario, encounter, seed_value)
+    return RedirectResponse(url=f"/play/{session.session_id}", status_code=303)
+
+
+@app.get("/play/{session_id}", response_class=HTMLResponse)
+def play_round(request: Request, session_id: str):
+    session = load_session(session_id)
+    if session is None:
+        return templates.TemplateResponse(
+            request,
+            "play_round.html",
+            {"session": None, "error": "Session not found. It may have expired."},
+            status_code=404,
+        )
+
+    result = score_encounter(session.encounter) if session.status == "in_progress" else None
+    last_outcome = session.round_log[-1] if session.round_log else None
+
+    return templates.TemplateResponse(
+        request,
+        "play_round.html",
+        {
+            "session": session,
+            "result": result,
+            "last_outcome": last_outcome,
+            "error": None,
+        },
+    )
+
+
+@app.post("/play/{session_id}/act")
+def play_act(session_id: str, action: str = Form(...)):
+    session = load_session(session_id)
+    if session is not None and session.status == "in_progress":
+        rng = random.Random(session.seed + len(session.round_log))
+        new_encounter, outcome, status = resolve_round(session.encounter, action, rng)
+        updated = replace(
+            session,
+            encounter=new_encounter,
+            round_log=session.round_log + (outcome,),
+            status=status,
+        )
+        save_session(updated)
+
+    return RedirectResponse(url=f"/play/{session_id}", status_code=303)

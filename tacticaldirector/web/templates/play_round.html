@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}TacticalDirector: Play{% endblock %}
+{% block content %}
+<div class="container">
+  <p><a href="/play">&larr; Choose a different scenario</a></p>
+
+  {% if session is none %}
+  <div class="error">{{ error }}</div>
+  {% else %}
+
+  <div class="report-card">
+    <h1>{{ session.encounter.character.name }}, {{ session.encounter.character.archetype|capitalize }}</h1>
+
+    <dl class="meta">
+      <dt>HP</dt>
+      <dd>
+        <span class="hp-bar-track"><span class="hp-bar-fill" style="width: {{ (session.encounter.character.hp_pct * 100)|round|int }}%"></span></span>
+        {{ session.encounter.character.hp_current }} / {{ session.encounter.character.hp_max }}
+      </dd>
+      <dt>Resources</dt><dd>{{ session.encounter.character.resources_current }} / {{ session.encounter.character.resources_max }}</dd>
+      <dt>Enemies remaining</dt>
+      <dd>
+        {% if session.encounter.enemies %}
+          {% for e in session.encounter.enemies %}{{ e.name }} (tier {{ e.threat_tier }}){% if not loop.last %}, {% endif %}{% endfor %}
+        {% else %}
+          None
+        {% endif %}
+      </dd>
+      <dt>Rounds played</dt><dd>{{ session.round_log|length }}</dd>
+    </dl>
+
+    {% if last_outcome %}
+    <div class="gm-take">
+      <h2>Round {{ last_outcome.round_number }}: {{ last_outcome.label }}</h2>
+      <p>
+        Rolled {{ last_outcome.roll }} vs target {{ last_outcome.target_number }}
+        <span class="tier-pill outcome-{{ last_outcome.outcome_tier|lower|replace(" ", "-") }}">{{ last_outcome.outcome_tier }}</span>
+      </p>
+      <p>{{ last_outcome.narrative_hint }}</p>
+      {% if last_outcome.skill_note %}<p class="table-talk">{{ last_outcome.skill_note }}</p>{% endif %}
+    </div>
+    {% endif %}
+
+    {% if session.status == "in_progress" %}
+    <h3>The Codex's Verdict</h3>
+    {% for action in result.ranked_actions %}
+    <div class="ranked-row">
+      <span class="rank-badge">{{ loop.index }}</span>
+      <strong>{{ action.label }}</strong>
+      <span class="action-tier">
+        {{ "%.2f"|format(action.overall_score) }} / 4.0
+        <span class="tier-pill tier-{{ action.tier|lower }}">{{ action.tier }}</span>
+      </span>
+    </div>
+    {% endfor %}
+
+    <form method="post" action="/play/{{ session.session_id }}/act" class="controls">
+      <select name="action" id="action">
+        {% for action in result.ranked_actions %}
+        <option value="{{ action.action }}">{{ action.label }} ({{ "%.2f"|format(action.overall_score) }})</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Take this action</button>
+    </form>
+    {% else %}
+    <div class="gm-take">
+      <h2>Session {{ session.status|capitalize }}</h2>
+      <p>{{ session.round_log|length }} round(s) played.</p>
+      <a href="/play" class="btn btn-primary">Play again</a>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if session.round_log %}
+  <details class="yaml-view">
+    <summary>Full round log</summary>
+    <ol>
+      {% for r in session.round_log %}
+      <li>{{ r.label }}: rolled {{ r.roll }} vs {{ r.target_number }} &rarr; {{ r.outcome_tier }}. {{ r.narrative_hint }}</li>
+      {% endfor %}
+    </ol>
+  </details>
+  {% endif %}
+
+  {% endif %}
+</div>
+{% endblock %}

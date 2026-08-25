@@ -1,5 +1,5 @@
-from tacticaldirector import cli
 from tacticaldirector.cli import main
+from tacticaldirector.play import scenarios as scenarios_module
 
 
 def test_advise_no_ai_prints_report(capsys):
@@ -79,7 +79,7 @@ def test_play_script_exhausted_ends_session_early(monkeypatch, tmp_path, capsys)
 def test_scenarios_lists_yaml_files_when_present(monkeypatch, tmp_path, capsys):
     (tmp_path / "goblin_warcamp.yaml").write_text("placeholder", encoding="utf-8")
     (tmp_path / "lone_sentinel.yaml").write_text("placeholder", encoding="utf-8")
-    monkeypatch.setattr(cli, "SCENARIOS_DIR", tmp_path)
+    monkeypatch.setattr(scenarios_module, "SCENARIOS_DIR", tmp_path)
 
     exit_code = main(["scenarios"])
 
@@ -90,7 +90,7 @@ def test_scenarios_lists_yaml_files_when_present(monkeypatch, tmp_path, capsys):
 
 
 def test_scenarios_with_missing_directory_prints_helpful_message(monkeypatch, tmp_path, capsys):
-    monkeypatch.setattr(cli, "SCENARIOS_DIR", tmp_path / "does-not-exist")
+    monkeypatch.setattr(scenarios_module, "SCENARIOS_DIR", tmp_path / "does-not-exist")
 
     exit_code = main(["scenarios"])
 

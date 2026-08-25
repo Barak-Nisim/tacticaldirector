@@ -812,6 +812,23 @@ dl.meta dd { margin: 0; }
 .tier-great { background: var(--tier-great); }
 .tier-optimal { background: var(--tier-optimal); }
 
+/* Play Mode outcome tiers -- a different vocabulary (Critical Success /
+   Success / Partial / Fail) from the advisor's Poor-to-Optimal tiers above,
+   reusing the same .tier-pill shape with its own color mapping */
+.outcome-critical-success { background: var(--tier-optimal); }
+.outcome-success { background: var(--tier-great); }
+.outcome-partial { background: var(--tier-situational); }
+.outcome-fail { background: var(--tier-poor); }
+
+.ranked-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0;
+  border-top: 1px dashed rgba(122, 31, 31, 0.2);
+}
+.ranked-row:first-child { border-top: none; }
+
 .action-card .category-list { margin-top: 0.9rem; padding-left: 2.35rem; }
 .action-card .category-row { padding: 0.4rem 0; border-top: 1px dashed rgba(122, 31, 31, 0.2); }
 .action-card .category-row:first-child { border-top: none; }

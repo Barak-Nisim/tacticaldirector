@@ -1,11 +1,22 @@
+import shutil
+
 from fastapi.testclient import TestClient
 
 from tacticaldirector.loader import load_encounter
+from tacticaldirector.play import scenarios as scenarios_module
 from tacticaldirector.web.app import app
 
 client = TestClient(app)
 
 SAMPLE_ENCOUNTER = load_encounter("examples/sample_encounter.yaml")
+
+
+def _isolated_scenarios_dir(monkeypatch, tmp_path):
+    scenarios_dir = tmp_path / "scenarios"
+    scenarios_dir.mkdir()
+    shutil.copy("examples/sample_encounter.yaml", scenarios_dir / "broken_bridge_ambush.yaml")
+    monkeypatch.setattr(scenarios_module, "SCENARIOS_DIR", scenarios_dir)
+    return scenarios_dir
 
 
 def _sample_form_data(**overrides):
@@ -108,3 +119,95 @@ def test_report_includes_view_as_yaml_engineering_section():
 
     assert "View as YAML" in response.text
     assert f"name: {SAMPLE_ENCOUNTER.character.name}" in response.text
+
+
+# ---------- Play Mode ----------
+
+
+def test_play_page_lists_scenarios(monkeypatch, tmp_path):
+    _isolated_scenarios_dir(monkeypatch, tmp_path)
+
+    response = client.get("/play")
+
+    assert response.status_code == 200
+    assert "Broken Bridge Ambush" in response.text
+
+
+def test_play_page_shows_empty_state_when_no_scenarios(monkeypatch, tmp_path):
+    monkeypatch.setattr(scenarios_module, "SCENARIOS_DIR", tmp_path / "nope")
+
+    response = client.get("/play")
+
+    assert response.status_code == 200
+    assert "No scenarios are available yet" in response.text
+
+
+def test_play_start_creates_session_and_redirects(monkeypatch, tmp_path):
+    _isolated_scenarios_dir(monkeypatch, tmp_path)
+    monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path / "sessions"))
+
+    response = client.post(
+        "/play/start",
+        data={"scenario": "broken_bridge_ambush", "seed": "1"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert response.headers["location"].startswith("/play/")
+    assert list((tmp_path / "sessions").glob("*.json"))
+
+
+def test_play_round_shows_ranking_for_in_progress_session(monkeypatch, tmp_path):
+    _isolated_scenarios_dir(monkeypatch, tmp_path)
+    monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path / "sessions"))
+
+    response = client.post("/play/start", data={"scenario": "broken_bridge_ambush", "seed": "1"})
+
+    assert response.status_code == 200
+    assert "The Codex's Verdict" in response.text
+    assert SAMPLE_ENCOUNTER.character.name in response.text
+    assert "Take this action" in response.text
+
+
+def test_play_round_returns_404_for_unknown_session(monkeypatch, tmp_path):
+    monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path / "sessions"))
+
+    response = client.get("/play/does-not-exist")
+
+    assert response.status_code == 404
+    assert "not found" in response.text.lower()
+
+
+def test_play_act_resolves_a_round_and_shows_the_outcome(monkeypatch, tmp_path):
+    _isolated_scenarios_dir(monkeypatch, tmp_path)
+    monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path / "sessions"))
+
+    start_response = client.post(
+        "/play/start", data={"scenario": "broken_bridge_ambush", "seed": "1"}
+    )
+    session_id = start_response.url.path.rsplit("/", 1)[-1]
+
+    act_response = client.post(f"/play/{session_id}/act", data={"action": "attack"})
+
+    assert act_response.status_code == 200
+    assert "Round 4: Attack" in act_response.text
+    assert "<dt>Rounds played</dt><dd>1</dd>" in act_response.text
+
+
+def test_full_scripted_playthrough_reaches_a_terminal_status(monkeypatch, tmp_path):
+    _isolated_scenarios_dir(monkeypatch, tmp_path)
+    monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path / "sessions"))
+
+    start_response = client.post(
+        "/play/start", data={"scenario": "broken_bridge_ambush", "seed": "1"}
+    )
+    session_id = start_response.url.path.rsplit("/", 1)[-1]
+
+    response = start_response
+    for _ in range(30):
+        if "Take this action" not in response.text:
+            break
+        response = client.post(f"/play/{session_id}/act", data={"action": "attack"})
+
+    assert "Play again" in response.text
+    assert any(f"Session {label}" in response.text for label in ("Victory", "Defeat", "Retreated"))

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}TacticalDirector: Play{% endblock %}
+{% block content %}
+<div class="container">
+  <p class="demo-banner">
+    Play Mode: choose a scenario and play it round by round. The Codex re-ranks your options
+    fresh each round; what actually happens is resolved with a seeded roll you can reproduce.
+    <a href="/app">&larr; Back to the single-round demo</a>
+  </p>
+
+  <h1>Choose your encounter</h1>
+  <p class="subtitle">Every round is a real choice, not a scripted outcome.</p>
+
+  {% if not scenarios %}
+  <p class="hint">No scenarios are available yet.</p>
+  {% else %}
+  <div class="archetype-grid">
+    {% for s in scenarios %}
+    <form method="post" action="/play/start" class="archetype-card">
+      <input type="hidden" name="scenario" value="{{ s.id }}">
+      <h3>{{ s.label }}</h3>
+      <p>{{ s.blurb }}</p>
+      <button type="submit">Begin</button>
+    </form>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

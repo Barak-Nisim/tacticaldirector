@@ -11,11 +11,10 @@ from pathlib import Path
 from tacticaldirector.loader import load_encounter
 from tacticaldirector.models import ACTION_LABELS
 from tacticaldirector.play.resolution import resolve_round
+from tacticaldirector.play.scenarios import list_scenarios
 from tacticaldirector.play.session import save_session, start_session
 from tacticaldirector.report.markdown import render
 from tacticaldirector.scoring import score_encounter
-
-SCENARIOS_DIR = Path("examples/scenarios")
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -147,18 +146,14 @@ def _run_play(args: argparse.Namespace) -> int:
 
 
 def _run_scenarios(args: argparse.Namespace) -> int:
-    if not SCENARIOS_DIR.exists():
-        print(f"No scenarios found. Looked in {SCENARIOS_DIR}/.", file=sys.stderr)
-        return 0
-
-    paths = sorted(SCENARIOS_DIR.glob("*.yaml"))
-    if not paths:
-        print(f"No scenarios found. Looked in {SCENARIOS_DIR}/.", file=sys.stderr)
+    scenarios = list_scenarios()
+    if not scenarios:
+        print("No scenarios found.", file=sys.stderr)
         return 0
 
     print("Available scenarios:")
-    for path in paths:
-        print(f"  {path.stem}  ({path})")
+    for s in scenarios:
+        print(f"  {s['id']}  ({s['label']})")
     return 0
 
 
