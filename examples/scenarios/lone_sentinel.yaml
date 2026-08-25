@@ -1,0 +1,23 @@
+# One high-threat guardian, and a character already worn down.
+# Caution may be the better part of valor.
+# Run: tacticaldirector play examples/scenarios/lone_sentinel.yaml
+
+character:
+  name: Mira
+  archetype: support
+  level: 6
+  hp_current: 8
+  hp_max: 40
+  resources_current: 3
+  resources_max: 4
+
+enemies:
+  - name: Stone Sentinel
+    threat_tier: 5
+
+terrain:
+  high_ground: false
+  cover: false
+  hazard: true
+
+round_number: 6

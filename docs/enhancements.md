@@ -6,7 +6,7 @@ Effort tags: **Minor** (an evening), **Moderate** (a focused day or two), **Majo
 
 ## Scenario model & scoring
 
-1. **[Major]** Multi-round encounters: carry HP, resources, and terrain forward across rounds instead of scoring one round in isolation, with a running log of past recommendations.
+1. **[Shipped]** ~~Multi-round encounters: carry HP, resources, and terrain forward across rounds instead of scoring one round in isolation, with a running log of past recommendations.~~ Shipped as Play Mode; see [`play_mode.md`](play_mode.md).
 2. **[Moderate]** Party support: score actions for multiple player characters in the same encounter, accounting for ally positioning and focus-fire.
 3. **[Moderate]** Additional archetypes beyond the current four (warrior, mage, skirmisher, support), each with its own offensive/ability weighting.
 4. **[Minor]** Status effects (stunned, poisoned, buffed) as an encounter input that shifts Survival Risk and Offensive Value.
@@ -17,7 +17,7 @@ Effort tags: **Minor** (an evening), **Moderate** (a focused day or two), **Majo
 ## Web UI / UX
 
 8. **[Moderate]** Dynamic enemy list (add/remove rows with JS) instead of five fixed slots, once the fixed-slot form has proven itself.
-9. **[Major]** A round-by-round session view: submit one encounter, get a recommendation, then advance to the next round with updated HP/resources carried forward.
+9. **[Shipped]** ~~A round-by-round session view: submit one encounter, get a recommendation, then advance to the next round with updated HP/resources carried forward.~~ Shipped as Play Mode; see [`play_mode.md`](play_mode.md).
 10. **[Minor]** Live HP/resource percentage bars next to the character fields as you type.
 11. **[Moderate]** Save/load encounters to a local file or browser `localStorage` so a half-built scenario survives a page refresh.
 12. **[Minor]** Print-friendly stylesheet for the report page (`@media print`), useful for physical tabletop sessions.
@@ -48,3 +48,15 @@ Effort tags: **Minor** (an evening), **Moderate** (a focused day or two), **Majo
 28. **[Moderate]** Dockerfile + docker-compose as an alternative to `pip install` for local setup.
 29. **[Minor]** Add `mypy` or `pyright` to CI alongside the existing `ruff` lint step.
 30. **[Moderate]** Snapshot/golden-file tests for the rendered Markdown and HTML report, to catch unintended template regressions that content-substring tests might miss.
+
+## Play Mode follow-ons
+
+Deliberately deferred out of Play Mode v1 (see [`play_mode.md`](play_mode.md) for what shipped):
+
+31. **[Moderate]** AI-narrated round outcomes (a "Game Master's take" per round), same structured-output pattern as the existing single-round narrator. Kept out of v1 so the resolution engine stays fully AI-free and deterministic-given-a-seed.
+32. **[Minor]** Let the player choose which enemy an Attack/Use Ability targets, instead of always auto-targeting the highest-threat remaining enemy.
+33. **[Moderate]** Party support in Play Mode: multiple player characters acting in the same session, sharing the enemies' reprisal.
+34. **[Minor]** A "replay" view that renders a completed session's full round log as a shareable Markdown recap.
+35. **[Moderate]** Play Mode-specific difficulty presets (an easier or harder target-number curve), distinct from the general scoring-threshold preset idea above.
+36. **[Minor]** A visible seed input on the web scenario-start form; currently only reachable via the CLI's `--seed` flag or a hidden form field.
+37. **[Moderate]** A shared RNG-advancement strategy between the CLI and web UI (e.g. persisting `random.getstate()` in the session file) so the same seed reproduces identical results on both surfaces, resolving the documented divergence in `play_mode.md`.

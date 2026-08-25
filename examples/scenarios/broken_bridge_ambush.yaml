@@ -1,0 +1,26 @@
+# A balanced fight on a narrow, half-collapsed bridge.
+# Run: tacticaldirector play examples/scenarios/broken_bridge_ambush.yaml
+
+character:
+  name: Kaelen
+  archetype: warrior
+  level: 5
+  hp_current: 18
+  hp_max: 45
+  resources_current: 1
+  resources_max: 3
+
+enemies:
+  - name: Orc Raider
+    threat_tier: 3
+  - name: Orc Raider
+    threat_tier: 3
+  - name: Goblin Archer
+    threat_tier: 1
+
+terrain:
+  high_ground: false
+  cover: true
+  hazard: false
+
+round_number: 4

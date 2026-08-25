@@ -1,0 +1,27 @@
+# Resources are thin and the terrain is dangerous.
+# Every ability spent has to count.
+# Run: tacticaldirector play examples/scenarios/ambush_at_dusk.yaml
+
+character:
+  name: Talia
+  archetype: mage
+  level: 5
+  hp_current: 20
+  hp_max: 35
+  resources_current: 0
+  resources_max: 4
+
+enemies:
+  - name: Bandit
+    threat_tier: 2
+  - name: Bandit
+    threat_tier: 2
+  - name: Bandit Captain
+    threat_tier: 3
+
+terrain:
+  high_ground: false
+  cover: false
+  hazard: true
+
+round_number: 2

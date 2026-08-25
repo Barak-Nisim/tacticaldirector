@@ -1,0 +1,30 @@
+# Many low-threat enemies, no single big danger. A numbers game.
+# Run: tacticaldirector play examples/scenarios/goblin_warcamp.yaml
+
+character:
+  name: Rowan
+  archetype: skirmisher
+  level: 4
+  hp_current: 30
+  hp_max: 30
+  resources_current: 2
+  resources_max: 3
+
+enemies:
+  - name: Goblin Scout
+    threat_tier: 1
+  - name: Goblin Scout
+    threat_tier: 1
+  - name: Goblin Scout
+    threat_tier: 1
+  - name: Goblin Scout
+    threat_tier: 1
+  - name: Goblin Scout
+    threat_tier: 1
+
+terrain:
+  high_ground: false
+  cover: false
+  hazard: false
+
+round_number: 1
