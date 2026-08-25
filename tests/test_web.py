@@ -85,6 +85,14 @@ def test_advise_renders_ranked_report_from_structured_form():
     assert "gm-take" not in response.text
 
 
+def test_advise_shows_enemy_intelligence():
+    response = client.post("/advise", data=_sample_form_data())
+
+    assert response.status_code == 200
+    assert "Enemy intelligence" in response.text
+    assert "Orc Raider" in response.text
+
+
 def test_advise_with_no_enemies_still_scores():
     response = client.post(
         "/advise",
@@ -103,6 +111,7 @@ def test_advise_with_no_enemies_still_scores():
     assert response.status_code == 200
     assert "Solo" in response.text
     assert "The Codex's Verdict" in response.text
+    assert "Enemy intelligence" not in response.text
 
 
 def test_advise_ai_checkbox_ignored_without_api_key(monkeypatch):
@@ -167,6 +176,8 @@ def test_play_round_shows_ranking_for_in_progress_session(monkeypatch, tmp_path)
     assert "The Codex's Verdict" in response.text
     assert SAMPLE_ENCOUNTER.character.name in response.text
     assert "Take this action" in response.text
+    assert "Enemy intelligence" in response.text
+    assert "Orc Raider" in response.text
 
 
 def test_play_round_returns_404_for_unknown_session(monkeypatch, tmp_path):

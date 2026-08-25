@@ -42,6 +42,19 @@
     {% endif %}
 
     {% if session.status == "in_progress" %}
+    {% if enemy_intel %}
+    <h3>Enemy intelligence</h3>
+    <div class="intel-list">
+      {% for intel in enemy_intel %}
+      <div class="intel-row">
+        <span class="intel-enemy">{{ intel.enemy_name }} <span class="hint">(threat {{ intel.threat_tier }})</span></span>
+        <span class="intel-action">{{ intel.predicted_action }}</span>
+        <p class="field-caption">{{ intel.reason }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
     <h3>The Codex's Verdict</h3>
     {% for action in result.ranked_actions %}
     {% set d = deltas[loop.index0] if deltas else none %}

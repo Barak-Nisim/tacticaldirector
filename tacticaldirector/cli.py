@@ -8,6 +8,7 @@ import sys
 from dataclasses import replace
 from pathlib import Path
 
+from tacticaldirector.intel import predict_enemy_intents, render_enemy_intel
 from tacticaldirector.loader import load_encounter
 from tacticaldirector.models import ACTION_LABELS
 from tacticaldirector.play.after_action import build_after_action_report, render_after_action_report
@@ -68,6 +69,9 @@ def _run_advise(args: argparse.Namespace) -> int:
         ai_narrative = generate_narrative(result)
 
     report = render(result, ai_narrative=ai_narrative)
+    intel = render_enemy_intel(predict_enemy_intents(encounter))
+    if intel:
+        report += "\n\n" + intel
 
     if args.output:
         Path(args.output).write_text(report, encoding="utf-8")
@@ -136,6 +140,9 @@ def _run_play(args: argparse.Namespace) -> int:
             if delta_text:
                 print(delta_text)
         print(render(result))
+        intel = render_enemy_intel(predict_enemy_intents(session.encounter))
+        if intel:
+            print("\n" + intel)
 
         if script is not None:
             if script_index >= len(script):

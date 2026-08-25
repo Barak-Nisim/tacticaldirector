@@ -17,6 +17,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from tacticaldirector.intel import predict_enemy_intents
 from tacticaldirector.loader import dump_encounter, load_encounter
 from tacticaldirector.models import ARCHETYPES, Character, Encounter, Enemy, Terrain
 from tacticaldirector.play.after_action import build_after_action_report
@@ -149,6 +150,7 @@ async def advise(
             "result": result,
             "ai_narrative": ai_narrative,
             "encounter_yaml": encounter_yaml,
+            "enemy_intel": predict_enemy_intents(encounter),
         },
     )
 
@@ -185,6 +187,9 @@ def play_round(request: Request, session_id: str):
         build_after_action_report(session) if session.status != "in_progress" else None
     )
     deltas = build_deltas(result, last_outcome) if result is not None else None
+    enemy_intel = (
+        predict_enemy_intents(session.encounter) if session.status == "in_progress" else ()
+    )
 
     return templates.TemplateResponse(
         request,
@@ -195,6 +200,7 @@ def play_round(request: Request, session_id: str):
             "last_outcome": last_outcome,
             "after_action": after_action,
             "deltas": deltas,
+            "enemy_intel": enemy_intel,
             "error": None,
         },
     )

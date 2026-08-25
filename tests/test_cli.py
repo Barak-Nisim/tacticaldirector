@@ -22,6 +22,16 @@ def test_advise_no_ai_writes_to_output_file(tmp_path):
     assert "TacticalDirector Advisory" in output_path.read_text(encoding="utf-8")
 
 
+def test_advise_includes_enemy_intelligence(capsys):
+    exit_code = main(["advise", "examples/sample_encounter.yaml", "--no-ai"])
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "Enemy intelligence" in captured.out
+    assert "Orc Raider" in captured.out
+    assert "Goblin Archer" in captured.out
+
+
 def test_play_with_script_runs_to_completion_non_interactively(monkeypatch, tmp_path, capsys):
     monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path))
 
@@ -42,6 +52,7 @@ def test_play_with_script_runs_to_completion_non_interactively(monkeypatch, tmp_
     assert "Session defeat. 3 round(s) played." in captured.out
     assert "After Action Report" in captured.out
     assert "Round 4" in captured.out  # sample_encounter.yaml starts at round_number 4
+    assert "Enemy intelligence" in captured.out
     assert list(tmp_path.glob("*.json"))  # session was persisted
 
 
