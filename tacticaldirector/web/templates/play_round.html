@@ -68,6 +68,28 @@
       <p>{{ session.round_log|length }} round(s) played.</p>
       <a href="/play" class="btn btn-primary">Play again</a>
     </div>
+
+    {% if after_action and after_action.rounds_played %}
+    <h3>After Action Report</h3>
+    <p class="subtitle">
+      You followed the Codex's top pick {{ after_action.agreements }} of {{ after_action.rounds_played }} round(s).
+    </p>
+    {% for review in after_action.round_reviews %}
+    <div class="ranked-row">
+      <span class="rank-badge">{{ review.round_number }}</span>
+      <div>
+        <strong>Round {{ review.round_number }}: {{ review.action_taken_label }}</strong>
+        {% if review.agreed_with_codex %}
+        <span class="alignment-tag alignment-good">Agreed with the Codex</span>
+        {% else %}
+        <span class="alignment-tag alignment-neutral">Codex favored {{ review.top_recommended_label }}</span>
+        {% endif %}
+        <span class="tier-pill outcome-{{ review.outcome_tier|lower|replace(" ", "-") }}">{{ review.outcome_tier }}</span>
+        <p class="field-caption">{{ review.narrative_hint }}</p>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
     {% endif %}
   </div>
 

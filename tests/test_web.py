@@ -211,3 +211,5 @@ def test_full_scripted_playthrough_reaches_a_terminal_status(monkeypatch, tmp_pa
 
     assert "Play again" in response.text
     assert any(f"Session {label}" in response.text for label in ("Victory", "Defeat", "Retreated"))
+    assert "After Action Report" in response.text
+    assert "Round 4" in response.text  # sample_encounter.yaml starts at round_number 4

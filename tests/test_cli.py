@@ -40,6 +40,8 @@ def test_play_with_script_runs_to_completion_non_interactively(monkeypatch, tmp_
     assert exit_code == 0
     assert "Starting session" in captured.out
     assert "Session defeat. 3 round(s) played." in captured.out
+    assert "After Action Report" in captured.out
+    assert "Round 4" in captured.out  # sample_encounter.yaml starts at round_number 4
     assert list(tmp_path.glob("*.json"))  # session was persisted
 
 

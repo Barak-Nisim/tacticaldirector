@@ -131,6 +131,7 @@ class RoundOutcome:
     round_number: int
     action: str  # one of ACTION_LABELS
     label: str
+    top_recommended_action: str  # the Codex's #1 pick this round, one of ACTION_LABELS
     roll: int
     target_number: int
     outcome_tier: str  # one of OUTCOME_TIERS

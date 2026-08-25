@@ -195,6 +195,7 @@ def resolve_round(
         round_number=encounter.round_number,
         action=action,
         label=ACTION_LABELS[action],
+        top_recommended_action=result.ranked_actions[0].action,
         roll=adjusted_roll,
         target_number=target,
         outcome_tier=outcome_tier,

@@ -19,6 +19,7 @@ from fastapi.templating import Jinja2Templates
 
 from tacticaldirector.loader import dump_encounter, load_encounter
 from tacticaldirector.models import ARCHETYPES, Character, Encounter, Enemy, Terrain
+from tacticaldirector.play.after_action import build_after_action_report
 from tacticaldirector.play.resolution import resolve_round
 from tacticaldirector.play.scenarios import list_scenarios, scenario_path
 from tacticaldirector.play.session import load_session, save_session, start_session
@@ -179,6 +180,9 @@ def play_round(request: Request, session_id: str):
 
     result = score_encounter(session.encounter) if session.status == "in_progress" else None
     last_outcome = session.round_log[-1] if session.round_log else None
+    after_action = (
+        build_after_action_report(session) if session.status != "in_progress" else None
+    )
 
     return templates.TemplateResponse(
         request,
@@ -187,6 +191,7 @@ def play_round(request: Request, session_id: str):
             "session": session,
             "result": result,
             "last_outcome": last_outcome,
+            "after_action": after_action,
             "error": None,
         },
     )

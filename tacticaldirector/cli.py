@@ -10,6 +10,7 @@ from pathlib import Path
 
 from tacticaldirector.loader import load_encounter
 from tacticaldirector.models import ACTION_LABELS
+from tacticaldirector.play.after_action import build_after_action_report, render_after_action_report
 from tacticaldirector.play.resolution import resolve_round
 from tacticaldirector.play.scenarios import list_scenarios
 from tacticaldirector.play.session import save_session, start_session
@@ -142,6 +143,10 @@ def _run_play(args: argparse.Namespace) -> int:
         save_session(session)
 
     print(f"Session {session.status}. {len(session.round_log)} round(s) played.")
+
+    if session.round_log:
+        print("\n" + render_after_action_report(build_after_action_report(session)))
+
     return 0
 
 
