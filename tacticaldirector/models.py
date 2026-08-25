@@ -104,3 +104,48 @@ class ActionScore:
 class TacticalResult:
     encounter: Encounter
     ranked_actions: tuple[ActionScore, ...]  # sorted highest overall_score first
+
+
+# ---------------------------------------------------------------------------
+# Play Mode: multi-round sessions layered on top of the advisor above. These
+# dataclasses describe game state; the resolution logic that produces them
+# lives in tacticaldirector/play/. Nothing above this line is used by, or
+# aware of, Play Mode.
+# ---------------------------------------------------------------------------
+
+OUTCOME_TIERS = ("Critical Success", "Success", "Partial", "Fail")
+
+SESSION_STATUSES = {"in_progress", "victory", "defeat", "retreated"}
+
+
+@dataclass(frozen=True)
+class Skill:
+    id: str
+    label: str
+    archetype: str  # one of ARCHETYPES
+    description: str
+
+
+@dataclass(frozen=True)
+class RoundOutcome:
+    round_number: int
+    action: str  # one of ACTION_LABELS
+    label: str
+    roll: int
+    target_number: int
+    outcome_tier: str  # one of OUTCOME_TIERS
+    hp_delta: int
+    resource_delta: int
+    enemy_defeated: str | None
+    narrative_hint: str
+    skill_note: str | None = None
+
+
+@dataclass(frozen=True)
+class PlaySession:
+    session_id: str
+    scenario_id: str
+    seed: int
+    encounter: Encounter
+    round_log: tuple[RoundOutcome, ...]
+    status: str  # one of SESSION_STATUSES
