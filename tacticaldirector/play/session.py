@@ -50,6 +50,7 @@ def _session_from_dict(raw: dict) -> PlaySession:
         encounter=_encounter_from_dict(raw["encounter"]),
         round_log=tuple(RoundOutcome(**r) for r in raw["round_log"]),
         status=raw["status"],
+        narrate=raw.get("narrate", False),  # older session files predate this field
     )
 
 
@@ -66,7 +67,9 @@ def load_session(session_id: str) -> PlaySession | None:
     return _session_from_dict(raw)
 
 
-def start_session(scenario_id: str, encounter: Encounter, seed: int) -> PlaySession:
+def start_session(
+    scenario_id: str, encounter: Encounter, seed: int, narrate: bool = False
+) -> PlaySession:
     session = PlaySession(
         session_id=new_session_id(),
         scenario_id=scenario_id,
@@ -74,6 +77,7 @@ def start_session(scenario_id: str, encounter: Encounter, seed: int) -> PlaySess
         encounter=encounter,
         round_log=(),
         status="in_progress",
+        narrate=narrate,
     )
     save_session(session)
     return session

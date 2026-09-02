@@ -72,3 +72,66 @@ def test_session_storage_is_isolated_from_real_user_home(monkeypatch, tmp_path):
     session = start_session("goblin_warcamp", _sample_encounter(), seed=2)
 
     assert (tmp_path / f"{session.session_id}.json").exists()
+
+
+def test_start_session_defaults_narrate_to_false(monkeypatch, tmp_path):
+    monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path))
+
+    session = start_session("broken_bridge_ambush", _sample_encounter(), seed=1)
+
+    assert session.narrate is False
+
+
+def test_start_session_persists_narrate_opt_in(monkeypatch, tmp_path):
+    monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path))
+
+    session = start_session("broken_bridge_ambush", _sample_encounter(), seed=1, narrate=True)
+    loaded = load_session(session.session_id)
+
+    assert loaded.narrate is True
+
+
+def test_load_session_defaults_narrate_for_a_session_file_predating_the_field(
+    monkeypatch, tmp_path
+):
+    # simulates a session saved before `narrate` and `gm_narration` existed:
+    # the JSON on disk simply lacks those keys entirely
+    import json
+
+    monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path))
+    session = start_session("broken_bridge_ambush", _sample_encounter(), seed=1)
+    path = tmp_path / f"{session.session_id}.json"
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    del raw["narrate"]
+    path.write_text(json.dumps(raw), encoding="utf-8")
+
+    loaded = load_session(session.session_id)
+
+    assert loaded is not None
+    assert loaded.narrate is False
+
+
+def test_load_session_defaults_gm_narration_for_a_round_predating_the_field(
+    monkeypatch, tmp_path
+):
+    import json
+    import random
+    from dataclasses import replace
+
+    monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path))
+    session = start_session("broken_bridge_ambush", _sample_encounter(), seed=7)
+    rng = random.Random(7)
+    new_encounter, outcome, status = resolution.resolve_round(session.encounter, "attack", rng)
+    updated = replace(
+        session, encounter=new_encounter, round_log=session.round_log + (outcome,), status=status
+    )
+    save_session(updated)
+
+    path = tmp_path / f"{session.session_id}.json"
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    del raw["round_log"][0]["gm_narration"]
+    path.write_text(json.dumps(raw), encoding="utf-8")
+
+    loaded = load_session(session.session_id)
+
+    assert loaded.round_log[0].gm_narration is None

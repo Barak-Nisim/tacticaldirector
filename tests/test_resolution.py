@@ -295,3 +295,14 @@ def test_state_stays_valid_across_many_seeded_playthroughs():
             rounds += 1
 
         assert rounds > 0
+
+
+def test_resolve_round_never_sets_gm_narration():
+    # purity guard: resolve_round is the deterministic core and must never
+    # itself produce or attach AI narration -- that's only ever done by the
+    # wiring layer (CLI/web) after the fact, via dataclasses.replace, per
+    # ai/round_narrator.py's design.
+    rng = random.Random(3)
+    _, outcome, _ = resolution.resolve_round(_sample_encounter(), "attack", rng)
+
+    assert outcome.gm_narration is None

@@ -141,6 +141,10 @@ class RoundOutcome:
     enemy_defeated: str | None
     narrative_hint: str
     skill_note: str | None = None
+    gm_narration: dict | None = None  # attached by the wiring layer after resolution, never
+    # by resolve_round() itself -- see ai/round_narrator.py. Optional with a
+    # default so old session files (recorded before this field existed)
+    # still round-trip through RoundOutcome(**r).
 
 
 @dataclass(frozen=True)
@@ -151,3 +155,4 @@ class PlaySession:
     encounter: Encounter
     round_log: tuple[RoundOutcome, ...]
     status: str  # one of SESSION_STATUSES
+    narrate: bool = False  # opt-in, off by default; whether rounds get an AI GM's take
