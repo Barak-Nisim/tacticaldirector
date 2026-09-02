@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import random
 import sys
 from dataclasses import replace
@@ -51,6 +52,11 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         metavar="ACTIONS",
         help="Comma-separated actions (e.g. attack,defend,retreat) for a scripted playthrough",
+    )
+    play.add_argument(
+        "--narrate",
+        action="store_true",
+        help="Add an AI game-master's take to each resolved round (needs ANTHROPIC_API_KEY)",
     )
 
     subparsers.add_parser("scenarios", help="List the built-in starter scenarios")
@@ -106,6 +112,14 @@ def _format_outcome(outcome) -> str:
     return "\n".join(lines)
 
 
+def _format_gm_narration(narration: dict) -> str:
+    lines = ["-- GM --", narration["gm_take"]]
+    table_talk = narration.get("table_talk")
+    if table_talk:
+        lines.append(f'"{table_talk}"')
+    return "\n".join(lines)
+
+
 def _format_deltas(deltas) -> str:
     changed = [d for d in deltas if d.rank_change]
     if not changed:
@@ -126,7 +140,16 @@ def _run_play(args: argparse.Namespace) -> int:
     seed = args.seed if args.seed is not None else random.SystemRandom().randrange(1_000_000)
     rng = random.Random(seed)
 
-    session = start_session(scenario_id, encounter, seed)
+    narrate = args.narrate
+    if narrate and not os.environ.get("ANTHROPIC_API_KEY"):
+        print(
+            "--narrate needs ANTHROPIC_API_KEY (copy .env.example to .env); "
+            "continuing without GM narration.",
+            file=sys.stderr,
+        )
+        narrate = False
+
+    session = start_session(scenario_id, encounter, seed, narrate=narrate)
     print(f"Starting session {session.session_id} (scenario: {scenario_id}, seed: {seed})\n")
 
     script = [a.strip() for a in args.script.split(",")] if args.script else None
@@ -159,7 +182,19 @@ def _run_play(args: argparse.Namespace) -> int:
             continue
 
         new_encounter, outcome, status = resolve_round(session.encounter, action, rng)
+
+        if session.narrate:
+            try:
+                from tacticaldirector.ai.round_narrator import narrate_round
+
+                post_round = replace(session, encounter=new_encounter, status=status)
+                outcome = replace(outcome, gm_narration=narrate_round(post_round, outcome))
+            except Exception as exc:  # narration is best-effort; never abort a session for it
+                print(f"(GM narration unavailable this round: {exc})", file=sys.stderr)
+
         print("\n" + _format_outcome(outcome) + "\n")
+        if outcome.gm_narration:
+            print(_format_gm_narration(outcome.gm_narration) + "\n")
 
         session = replace(
             session,

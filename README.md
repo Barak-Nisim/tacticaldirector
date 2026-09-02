@@ -70,7 +70,9 @@ Each round, the Codex re-ranks your options against the current state, you pick 
 d20 roll (target number derived from that action's own score) resolves what happens: an enemy
 defeated, damage taken, a resource spent. The session ends in victory, defeat, or a clean retreat.
 `--script attack,defend,retreat` runs a scripted, non-interactive playthrough instead of prompting
-for input. Four starter scenarios ship in `examples/scenarios/`, each built around a different
+for input. `--narrate` adds an opt-in AI "Game Master's take" to each resolved round (needs
+`ANTHROPIC_API_KEY`; the deterministic outcome is decided first and never changed by it, and a
+failed call just skips that round's narration). Four starter scenarios ship in `examples/scenarios/`, each built around a different
 tactical tension (a numbers game, a lone dangerous foe, thin resources, a balanced fight). Full
 resolution rules, the outcome-tier table, and each archetype's skill are documented in
 [`docs/play_mode.md`](docs/play_mode.md).
@@ -93,7 +95,7 @@ All pages sit on top of the same scoring engine, loader, and AI narrator the CLI
 ## Development
 
 ```bash
-pytest      # 84 tests, all mocked where they touch the AI layer -- no network calls, no cost
+pytest      # all mocked where they touch the AI layer -- no network calls, no cost
 ruff check .
 ```
 

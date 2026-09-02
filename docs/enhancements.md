@@ -53,7 +53,7 @@ Effort tags: **Minor** (an evening), **Moderate** (a focused day or two), **Majo
 
 Deliberately deferred out of Play Mode v1 (see [`play_mode.md`](play_mode.md) for what shipped):
 
-31. **[Moderate]** AI-narrated round outcomes (a "Game Master's take" per round), same structured-output pattern as the existing single-round narrator. Kept out of v1 so the resolution engine stays fully AI-free and deterministic-given-a-seed.
+31. **[Shipped]** ~~AI-narrated round outcomes (a "Game Master's take" per round), same structured-output pattern as the existing single-round narrator.~~ Shipped for the CLI via `play --narrate` (`ai/round_narrator.py`); the resolution engine stays fully AI-free and deterministic-given-a-seed, and the narrator only dramatizes an already-decided outcome. Web UI exposure is still open.
 32. **[Minor]** Let the player choose which enemy an Attack/Use Ability targets, instead of always auto-targeting the highest-threat remaining enemy.
 33. **[Moderate]** Party support in Play Mode: multiple player characters acting in the same session, sharing the enemies' reprisal.
 34. **[Minor]** A "replay" view that renders a completed session's full round log as a shareable Markdown recap.

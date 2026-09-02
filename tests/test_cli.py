@@ -1,3 +1,5 @@
+import json
+
 from tacticaldirector.cli import main
 from tacticaldirector.play import scenarios as scenarios_module
 
@@ -87,6 +89,94 @@ def test_play_script_exhausted_ends_session_early(monkeypatch, tmp_path, capsys)
     assert exit_code == 0
     assert "Script exhausted" in captured.err
     assert "Session in_progress." in captured.out
+
+
+def test_play_narrate_attaches_gm_narration(monkeypatch, tmp_path, capsys):
+    monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path))
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+
+    seen_rounds = []
+
+    def fake_narrate_round(session, outcome):
+        seen_rounds.append(outcome.round_number)
+        return {"gm_take": "Kaelen's blade bites deep.", "table_talk": "The torches gutter."}
+
+    monkeypatch.setattr(
+        "tacticaldirector.ai.round_narrator.narrate_round", fake_narrate_round
+    )
+
+    exit_code = main(
+        [
+            "play",
+            "examples/sample_encounter.yaml",
+            "--seed",
+            "1",
+            "--script",
+            "attack,attack,attack,attack,attack",
+            "--narrate",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert seen_rounds  # the narrator was actually called
+    assert "-- GM --" in captured.out
+    assert "Kaelen's blade bites deep." in captured.out
+    assert "The torches gutter." in captured.out
+
+    saved = json.loads(next(tmp_path.glob("*.json")).read_text(encoding="utf-8"))
+    assert saved["narrate"] is True
+    assert any(r.get("gm_narration") for r in saved["round_log"])
+
+
+def test_play_narrate_without_api_key_warns_and_continues(monkeypatch, tmp_path, capsys):
+    monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path))
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+
+    exit_code = main(
+        [
+            "play",
+            "examples/sample_encounter.yaml",
+            "--seed",
+            "1",
+            "--script",
+            "attack,attack,attack,attack,attack",
+            "--narrate",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "without GM narration" in captured.err
+    assert "-- GM --" not in captured.out
+    assert "Session defeat. 3 round(s) played." in captured.out
+
+
+def test_play_narrate_survives_a_narrator_failure(monkeypatch, tmp_path, capsys):
+    monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path))
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key")
+
+    def boom(session, outcome):
+        raise RuntimeError("api down")
+
+    monkeypatch.setattr("tacticaldirector.ai.round_narrator.narrate_round", boom)
+
+    exit_code = main(
+        [
+            "play",
+            "examples/sample_encounter.yaml",
+            "--seed",
+            "1",
+            "--script",
+            "attack,attack,attack,attack,attack",
+            "--narrate",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert "GM narration unavailable this round: api down" in captured.err
+    assert "Session defeat. 3 round(s) played." in captured.out
 
 
 def test_scenarios_lists_yaml_files_when_present(monkeypatch, tmp_path, capsys):
