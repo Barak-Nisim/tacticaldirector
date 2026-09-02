@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import json
 
-from tacticaldirector.models import TacticalResult
+from tacticaldirector.models import PlaySession, RoundOutcome, TacticalResult
 
 SYSTEM_PROMPT = (
     "You are a tactical game master's assistant. You are given the fully-ranked "
@@ -71,4 +71,70 @@ def build_user_prompt(result: TacticalResult) -> str:
         "2. One line of 'table talk' flavor reacting to the encounter as it "
         "stands (atmosphere, not mechanics).\n"
         "3. A brief note on why the lowest-ranked action ranked last."
+    )
+
+
+# ---------------------------------------------------------------------------
+# Play Mode round narration: a sibling prompt for narrating one already-
+# resolved round (see ai/round_narrator.py), additive to everything above.
+# The single-round advisor's SYSTEM_PROMPT/build_user_prompt are untouched.
+# ---------------------------------------------------------------------------
+
+ROUND_SYSTEM_PROMPT = (
+    "You are a tabletop game master narrating one round of combat that has "
+    "already been resolved by a deterministic dice-and-threshold system. You "
+    "are given the round's actual mechanical result: the action taken, the "
+    "roll, the target number, the outcome tier, and exactly what changed "
+    "(HP, resources, whether an enemy was defeated). Your only job is to "
+    "make that specific, already-decided outcome vivid and dramatic. Do not "
+    "change the roll, the outcome tier, the HP or resource numbers, or "
+    "which enemy fell -- the field called 'narrative_hint' in the input is "
+    "the canonical fact of what happened; never contradict it or invent a "
+    "different result. Do not invent named commercial game systems or "
+    "rules text. Keep it grounded in what actually happened this round."
+)
+
+
+def build_round_payload(session: PlaySession, outcome: RoundOutcome) -> dict:
+    character = session.encounter.character
+    return {
+        "round_number": outcome.round_number,
+        "action_taken": outcome.label,
+        "roll": outcome.roll,
+        "target_number": outcome.target_number,
+        "outcome_tier": outcome.outcome_tier,
+        "narrative_hint": outcome.narrative_hint,
+        "hp_delta": outcome.hp_delta,
+        "resource_delta": outcome.resource_delta,
+        "enemy_defeated": outcome.enemy_defeated,
+        "skill_note": outcome.skill_note,
+        "character": {
+            "name": character.name,
+            "archetype": character.archetype,
+            "hp_current": character.hp_current,
+            "hp_max": character.hp_max,
+        },
+        "enemies_remaining": [
+            {"name": e.name, "threat_tier": e.threat_tier} for e in session.encounter.enemies
+        ],
+        "terrain": {
+            "high_ground": session.encounter.terrain.high_ground,
+            "cover": session.encounter.terrain.cover,
+            "hazard": session.encounter.terrain.hazard,
+        },
+    }
+
+
+def build_round_user_prompt(session: PlaySession, outcome: RoundOutcome) -> str:
+    payload = build_round_payload(session, outcome)
+    return (
+        "Here is this round's already-resolved outcome, as JSON:\n\n"
+        f"{json.dumps(payload, indent=2)}\n\n"
+        "Write:\n"
+        "1. A 'gm_take' (about 60-90 words) dramatizing exactly what happened "
+        "this round, grounded in narrative_hint and the actual deltas -- not "
+        "a mechanical restatement of the numbers, but not a different "
+        "outcome either.\n"
+        "2. One line of 'table_talk': atmospheric flavor reacting to the "
+        "current state of the fight, not a summary of the mechanics."
     )
