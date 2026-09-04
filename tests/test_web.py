@@ -151,6 +151,50 @@ def test_play_page_shows_empty_state_when_no_scenarios(monkeypatch, tmp_path):
     assert "No scenarios are available yet" in response.text
 
 
+def test_play_page_offers_a_visible_seed_field(monkeypatch, tmp_path):
+    _isolated_scenarios_dir(monkeypatch, tmp_path)
+
+    response = client.get("/play")
+
+    assert response.status_code == 200
+    assert 'id="play-seed"' in response.text
+    assert 'name="seed"' in response.text  # the hidden field each card form submits
+
+
+def test_play_start_with_blank_seed_falls_back_to_a_random_one(monkeypatch, tmp_path):
+    _isolated_scenarios_dir(monkeypatch, tmp_path)
+    monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path / "sessions"))
+    from tacticaldirector.play.session import load_session
+
+    response = client.post(
+        "/play/start",
+        data={"scenario": "broken_bridge_ambush", "seed": ""},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    session_id = response.headers["location"].removeprefix("/play/")
+    session = load_session(session_id)
+    assert isinstance(session.seed, int)
+
+
+def test_play_start_with_a_malformed_seed_does_not_500(monkeypatch, tmp_path):
+    _isolated_scenarios_dir(monkeypatch, tmp_path)
+    monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path / "sessions"))
+    from tacticaldirector.play.session import load_session
+
+    response = client.post(
+        "/play/start",
+        data={"scenario": "broken_bridge_ambush", "seed": "not-a-number"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    session_id = response.headers["location"].removeprefix("/play/")
+    session = load_session(session_id)
+    assert isinstance(session.seed, int)  # fell back to a random seed, not a crash
+
+
 def test_play_start_creates_session_and_redirects(monkeypatch, tmp_path):
     _isolated_scenarios_dir(monkeypatch, tmp_path)
     monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path / "sessions"))

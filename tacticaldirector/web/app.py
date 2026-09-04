@@ -165,7 +165,12 @@ def play_scenarios(request: Request):
 @app.post("/play/start")
 def play_start(scenario: str = Form(...), seed: str | None = Form(None)):
     encounter = load_encounter(scenario_path(scenario))
-    seed_value = int(seed) if seed else random.SystemRandom().randrange(1_000_000)
+    try:
+        seed_value = int(seed) if seed else None
+    except ValueError:  # a malformed seed shouldn't 500 the start of a session
+        seed_value = None
+    if seed_value is None:
+        seed_value = random.SystemRandom().randrange(1_000_000)
     session = start_session(scenario, encounter, seed_value)
     return RedirectResponse(url=f"/play/{session.session_id}", status_code=303)
 

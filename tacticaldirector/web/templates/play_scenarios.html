@@ -14,16 +14,36 @@
   {% if not scenarios %}
   <p class="hint">No scenarios are available yet.</p>
   {% else %}
+  <div class="play-seed-field">
+    <label for="play-seed">Seed (optional)</label>
+    <input type="number" id="play-seed" min="0" placeholder="random">
+    <p class="hint">Leave blank for a random seed, or set one to reproduce a specific session.</p>
+  </div>
+
   <div class="archetype-grid">
     {% for s in scenarios %}
     <form method="post" action="/play/start" class="archetype-card">
       <input type="hidden" name="scenario" value="{{ s.id }}">
+      <input type="hidden" name="seed" value="">
       <h3>{{ s.label }}</h3>
       <p>{{ s.blurb }}</p>
       <button type="submit">Begin</button>
     </form>
     {% endfor %}
   </div>
+
+  <script>
+    (function () {
+      var seedField = document.getElementById("play-seed");
+      if (!seedField) return;
+      document.querySelectorAll(".archetype-card").forEach(function (form) {
+        form.addEventListener("submit", function () {
+          var hidden = form.querySelector('input[name="seed"]');
+          if (hidden) hidden.value = seedField.value;
+        });
+      });
+    })();
+  </script>
   {% endif %}
 </div>
 {% endblock %}

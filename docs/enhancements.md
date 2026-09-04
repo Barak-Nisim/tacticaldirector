@@ -58,7 +58,7 @@ Deliberately deferred out of Play Mode v1 (see [`play_mode.md`](play_mode.md) fo
 33. **[Moderate]** Party support in Play Mode: multiple player characters acting in the same session, sharing the enemies' reprisal.
 34. **[Minor]** A "replay" view that renders a completed session's full round log as a shareable Markdown recap.
 35. **[Moderate]** Play Mode-specific difficulty presets (an easier or harder target-number curve), distinct from the general scoring-threshold preset idea above.
-36. **[Minor]** A visible seed input on the web scenario-start form; currently only reachable via the CLI's `--seed` flag or a hidden form field.
+36. **[Shipped]** ~~A visible seed input on the web scenario-start form.~~ Shipped: one optional `#play-seed` number field above the scenario cards (blank = random, matching the existing CLI default), propagated into whichever card's form gets submitted via a few lines of vanilla JS since each scenario is its own `<form>`. `POST /play/start` already accepted a `seed` field with no UI for it; a malformed value now falls back to a random seed instead of 500ing, since a visible input makes bad input far more reachable than the old hidden-only path.
 37. **[Moderate]** A shared RNG-advancement strategy between the CLI and web UI (e.g. persisting `random.getstate()` in the session file) so the same seed reproduces identical results on both surfaces, resolving the documented divergence in `play_mode.md`.
 
 ## Bigger bets (real architecture decisions, plan formally before building)

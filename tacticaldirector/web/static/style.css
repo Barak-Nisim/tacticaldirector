@@ -378,6 +378,9 @@ main > section h2 { text-align: center; margin: 0 0 0.5rem; }
 
 .archetypes .eyebrow { text-align: center; }
 
+.play-seed-field { max-width: 260px; margin-top: 1.5rem; }
+.play-seed-field .hint { margin: 0.4rem 0 0; }
+
 .archetype-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
