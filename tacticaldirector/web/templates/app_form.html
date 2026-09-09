@@ -38,6 +38,7 @@
         <div>
           <label for="hp_max">Max HP</label>
           <input type="number" id="hp_max" name="hp_max" min="1" value="{{ character.hp_max }}">
+          <div class="stat-bar-mini" aria-hidden="true"><div class="stat-bar-mini-fill" id="hp-bar-fill"></div></div>
         </div>
         <div>
           <label for="resources_current">Resources remaining</label>
@@ -46,6 +47,7 @@
         <div>
           <label for="resources_max">Resources max</label>
           <input type="number" id="resources_max" name="resources_max" min="0" value="{{ character.resources_max }}">
+          <div class="stat-bar-mini" aria-hidden="true"><div class="stat-bar-mini-fill" id="resources-bar-fill"></div></div>
         </div>
         <div>
           <label for="round_number">Round number</label>
@@ -107,4 +109,36 @@
     <p class="field-caption">Scores Attack, Use Ability, Defend, and Retreat against four categories, and renders the ranked report below. With the Game Master's take on, Claude also adds a short narration and a line of table talk.</p>
   </form>
 </div>
+
+<script>
+  (function () {
+    function wireBar(currentId, maxId, fillId) {
+      var current = document.getElementById(currentId);
+      var max = document.getElementById(maxId);
+      var fill = document.getElementById(fillId);
+      if (!current || !max || !fill) return;
+
+      function update() {
+        var cur = parseFloat(current.value);
+        var mx = parseFloat(max.value);
+        var pct = (!isFinite(cur) || !isFinite(mx) || mx <= 0)
+          ? 0
+          : Math.max(0, Math.min(100, (cur / mx) * 100));
+        fill.style.width = pct + "%";
+        fill.style.backgroundColor =
+          pct <= 25 ? "var(--tier-poor)" :
+          pct <= 50 ? "var(--tier-situational)" :
+          pct <= 75 ? "var(--tier-solid)" : "var(--tier-great)";
+        fill.parentElement.title = cur + " / " + mx + " (" + Math.round(pct) + "%)";
+      }
+
+      current.addEventListener("input", update);
+      max.addEventListener("input", update);
+      update();
+    }
+
+    wireBar("hp_current", "hp_max", "hp-bar-fill");
+    wireBar("resources_current", "resources_max", "resources-bar-fill");
+  })();
+</script>
 {% endblock %}

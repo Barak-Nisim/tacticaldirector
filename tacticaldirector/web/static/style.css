@@ -649,6 +649,21 @@ blockquote.card cite { color: var(--muted-on-parchment); font-size: 0.85rem; fon
 .field-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
 .field-grid label { margin-bottom: 0.3rem; }
 
+.stat-bar-mini {
+  margin-top: 0.4rem;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--charcoal-2);
+  overflow: hidden;
+}
+.stat-bar-mini-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: var(--tier-poor);
+  transition: width 0.15s ease, background-color 0.15s ease;
+}
+
 label { display: block; font-family: "Cinzel", serif; font-weight: 600; font-size: 0.85rem; letter-spacing: 0.02em; margin-bottom: 0.4rem; color: var(--muted); }
 
 input[type="text"],

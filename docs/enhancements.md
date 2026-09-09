@@ -18,7 +18,7 @@ Effort tags: **Minor** (an evening), **Moderate** (a focused day or two), **Majo
 
 8. **[Moderate]** Dynamic enemy list (add/remove rows with JS) instead of five fixed slots, once the fixed-slot form has proven itself.
 9. **[Shipped]** ~~A round-by-round session view: submit one encounter, get a recommendation, then advance to the next round with updated HP/resources carried forward.~~ Shipped as Play Mode; see [`play_mode.md`](play_mode.md).
-10. **[Minor]** Live HP/resource percentage bars next to the character fields as you type.
+10. **[Shipped]** ~~Live HP/resource percentage bars next to the character fields as you type.~~ Shipped: a thin bar under Max HP and under Resources max fills live as either field changes, colored by the same tier-threshold palette used elsewhere in the report (poor/situational/solid/great), with the exact numbers and percentage in a hover tooltip. Pure client-side JS/CSS -- no scoring or backend change.
 11. **[Moderate]** Save/load encounters to a local file or browser `localStorage` so a half-built scenario survives a page refresh.
 12. **[Minor]** Print-friendly stylesheet for the report page (`@media print`), useful for physical tabletop sessions.
 13. **[Minor]** Manual dark/light theme toggle; currently the site only follows OS preference via `prefers-color-scheme`.
