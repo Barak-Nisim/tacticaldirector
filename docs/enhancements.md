@@ -23,7 +23,7 @@ Effort tags: **Minor** (an evening), **Moderate** (a focused day or two), **Majo
 12. **[Minor]** Print-friendly stylesheet for the report page (`@media print`), useful for physical tabletop sessions.
 13. **[Minor]** Manual dark/light theme toggle; currently the site only follows OS preference via `prefers-color-scheme`.
 14. **[Moderate]** A compact "quick advise" mode: fewer fields, sensible defaults, for GMs who want a fast answer mid-session.
-15. **[Minor]** Visual threat-tier indicator (icon or color) next to each enemy row instead of a plain number select.
+15. **[Shipped]** ~~Visual threat-tier indicator (icon or color) next to each enemy row instead of a plain number select.~~ Shipped: a small colored dot sits beside each enemy row's threat-tier select and recolors live on change, running tier 1 to 5 across the existing palette (optimal/great/solid/situational/poor) so higher threat reads hotter, with the tier and its word in a hover tooltip. The select is untouched and still the actual control; the dot is additive and `aria-hidden`. Pure client-side JS/CSS -- no scoring or backend change.
 
 ## AI layer
 

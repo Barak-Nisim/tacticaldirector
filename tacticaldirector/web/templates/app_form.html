@@ -68,11 +68,14 @@
         </div>
         <div>
           <label for="enemy_threat_{{ i }}">Threat tier</label>
-          <select id="enemy_threat_{{ i }}" name="enemy_threat_{{ i }}">
-            {% for t in range(1, 6) %}
-            <option value="{{ t }}" {% if enemy and enemy.threat_tier == t %}selected{% endif %}>{{ t }}</option>
-            {% endfor %}
-          </select>
+          <div class="threat-field">
+            <span class="threat-dot" id="enemy_threat_dot_{{ i }}" aria-hidden="true"></span>
+            <select id="enemy_threat_{{ i }}" name="enemy_threat_{{ i }}">
+              {% for t in range(1, 6) %}
+              <option value="{{ t }}" {% if enemy and enemy.threat_tier == t %}selected{% endif %}>{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
         </div>
       </div>
       {% endfor %}
@@ -139,6 +142,33 @@
 
     wireBar("hp_current", "hp_max", "hp-bar-fill");
     wireBar("resources_current", "resources_max", "resources-bar-fill");
+
+    var THREAT_COLORS = [
+      "var(--tier-optimal)",
+      "var(--tier-great)",
+      "var(--tier-solid)",
+      "var(--tier-situational)",
+      "var(--tier-poor)"
+    ];
+    var THREAT_LABELS = ["trivial", "minor", "moderate", "severe", "deadly"];
+
+    function wireThreatDot(select, dot) {
+      function update() {
+        var tier = parseInt(select.value, 10);
+        var idx = (isFinite(tier) && tier >= 1 && tier <= 5) ? tier - 1 : 0;
+        dot.style.backgroundColor = THREAT_COLORS[idx];
+        dot.title = "Threat tier " + (idx + 1) + " (" + THREAT_LABELS[idx] + ")";
+      }
+
+      select.addEventListener("change", update);
+      update();
+    }
+
+    for (var i = 0; i < 5; i++) {
+      var select = document.getElementById("enemy_threat_" + i);
+      var dot = document.getElementById("enemy_threat_dot_" + i);
+      if (select && dot) wireThreatDot(select, dot);
+    }
   })();
 </script>
 {% endblock %}

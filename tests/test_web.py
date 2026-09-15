@@ -73,6 +73,17 @@ def test_app_form_is_prefilled_from_sample_encounter():
     assert 'name="archetype"' in response.text
 
 
+def test_app_form_has_threat_tier_indicator_per_enemy_row():
+    response = client.get("/app")
+
+    assert response.status_code == 200
+    for i in range(5):
+        assert f'id="enemy_threat_dot_{i}"' in response.text
+        # the select itself stays intact; the indicator is additive
+        assert f'id="enemy_threat_{i}"' in response.text
+    assert response.text.count('class="threat-dot"') == 5
+
+
 def test_advise_renders_ranked_report_from_structured_form():
     response = client.post("/advise", data=_sample_form_data())
 
