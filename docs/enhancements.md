@@ -31,7 +31,7 @@ Effort tags: **Minor** (an evening), **Moderate** (a focused day or two), **Majo
 17. **[Minor]** Tone toggle for the narration (gritty/serious vs. lighthearted), since the current voice is fixed.
 18. **[Major]** Let the AI generate flavor text for the enemies themselves (appearance, tactics) grounded in their threat tier, clearly separated from the scoring-driven recommendation.
 19. **[Moderate]** Multi-turn follow-up ("why not Attack?") grounded in the same structured category scores the narrator already receives.
-20. **[Minor]** Cache narratives for identical encounters so re-running the same submission doesn't re-spend tokens.
+20. **[Shipped]** ~~Cache narratives for identical encounters so re-running the same submission doesn't re-spend tokens.~~ Shipped: `ai/narrative_cache.py` keys each narration by a SHA-256 hash of the exact payload the narrator already sends the model (`prompts.build_payload` -- character, enemy list and threat tiers, terrain flags, round number, and every ranked action's score, tier, and category reasons), storing one JSON file per distinct encounter under `~/.tacticaldirector/narrative_cache/`, overridable via `TACTICALDIRECTOR_NARRATIVE_CACHE_DIR` so tests never touch a real home directory (mirrors `play/session.py`'s storage pattern). The lookup sits inside `generate_narrative()` itself, so the CLI and the web form both get it with no call-site change. There's no TTL to manage: any real change to the encounter, or to what the scoring engine made of it, is itself a cache miss. Play Mode's per-round narrator is deliberately untouched, since its rounds are never identical.
 
 ## Integrations
 
