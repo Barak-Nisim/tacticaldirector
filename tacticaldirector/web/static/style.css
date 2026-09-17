@@ -925,3 +925,163 @@ dl.meta dd { margin: 0; }
 @media (prefers-color-scheme: light) {
   /* the app is designed dark-first; keep it dark even in light OS mode for brand consistency */
 }
+
+/* ---------- print: the report as a table handout ----------
+
+   Scoped to `body.printable-report`, set by the two templates that render a
+   report card (the advisor report and the Play Mode round / After Action
+   view), so the marketing pages keep the browser's own print defaults.
+
+   Deliberately plain black-on-white rather than parchment-on-obsidian.
+   Nothing on this page carries meaning by color alone -- every tier, threat
+   level and outcome is spelled out in words right next to its pill -- so
+   dropping the palette costs no information, and a GM printing a handout
+   mid-session would rather not spend a cartridge on a full-bleed parchment
+   background the printer may well drop anyway. */
+
+@media print {
+  @page { margin: 1.6cm; }
+
+  body.printable-report {
+    background: #fff;
+    color: #000;
+    font-size: 11pt;
+  }
+
+  /* the fixed grain overlay would print as a grey wash across every page */
+  body.printable-report::before { display: none; }
+
+  /* chrome a printed handout has no use for */
+  body.printable-report .site-nav,
+  body.printable-report .site-footer,
+  body.printable-report .back-link,
+  body.printable-report .demo-banner,
+  body.printable-report .controls,
+  body.printable-report .btn,
+  body.printable-report .yaml-view,
+  body.printable-report .hp-bar-track,
+  body.printable-report .report-card::after {
+    display: none !important;
+  }
+
+  body.printable-report .container {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* the card is the page now: no frame, no shadow, no inset margin */
+  body.printable-report .report-card {
+    background: none;
+    color: #000;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  body.printable-report h1,
+  body.printable-report h2,
+  body.printable-report h3,
+  body.printable-report .report-card h1,
+  body.printable-report .report-card h2,
+  body.printable-report .report-card h3 {
+    color: #000;
+  }
+
+  body.printable-report a {
+    color: #000;
+    text-decoration: none;
+  }
+
+  /* muted greys stay grey enough to read as secondary, dark enough to print */
+  body.printable-report dl.meta dt,
+  body.printable-report .subtitle,
+  body.printable-report .hint,
+  body.printable-report .field-caption,
+  body.printable-report .category-row .category-reason,
+  body.printable-report .top-pick-stat .tp-label,
+  body.printable-report .gm-take .table-talk {
+    color: #333;
+  }
+
+  /* every ranked action prints in full -- a collapsed <details> on paper is
+     just a line the GM can't open */
+  body.printable-report .action-card[open],
+  body.printable-report .action-card {
+    background: none;
+    border: 1px solid #000;
+    content-visibility: visible;
+  }
+  body.printable-report .action-card > *:not(summary) { display: block !important; }
+  body.printable-report .action-card summary {
+    list-style: none;
+    cursor: auto;
+  }
+  body.printable-report .action-card summary::-webkit-details-marker { display: none; }
+
+  /* the modern equivalent of the rule above, for engines that hide details
+     content on the pseudo-element rather than on the light-DOM children */
+  body.printable-report .action-card::details-content {
+    content-visibility: visible;
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* backgrounds are stripped by default when printing, so anything that
+     relied on a dark fill for contrast has to be restated in outline */
+  body.printable-report .rank-badge {
+    background: none !important;
+    color: #000 !important;
+    border: 1px solid #000;
+  }
+  body.printable-report .tier-pill {
+    background: none !important;
+    color: #000 !important;
+    border: 1px solid #000;
+  }
+  body.printable-report .alignment-tag { color: #000; }
+  body.printable-report .category-row .category-score { color: #000; }
+  body.printable-report .intel-action { color: #000; }
+
+  body.printable-report .top-pick-panel,
+  body.printable-report .gm-take,
+  body.printable-report .intel-row,
+  body.printable-report .error {
+    background: none;
+    border: 1px solid #000;
+    color: #000;
+  }
+
+  body.printable-report .ranked-row,
+  body.printable-report .action-card .category-row {
+    border-top-color: #666;
+  }
+
+  /* page breaks: never split a card, a ranked row or an intel line across
+     two sheets, and never strand a heading at the foot of a page */
+  body.printable-report .report-card { break-inside: auto; }
+  body.printable-report .action-card,
+  body.printable-report .ranked-row,
+  body.printable-report .intel-row,
+  body.printable-report .top-pick-panel,
+  body.printable-report .gm-take,
+  body.printable-report dl.meta {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  body.printable-report h1,
+  body.printable-report h2,
+  body.printable-report h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  body.printable-report p { orphans: 3; widows: 3; }
+
+  /* no table markup on the report today, but the shared table styling exists
+     and a long one would otherwise lose its header on the second sheet */
+  body.printable-report thead { display: table-header-group; }
+  body.printable-report tr { break-inside: avoid; page-break-inside: avoid; }
+}

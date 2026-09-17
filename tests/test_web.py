@@ -141,6 +141,37 @@ def test_report_includes_view_as_yaml_engineering_section():
     assert f"name: {SAMPLE_ENCOUNTER.character.name}" in response.text
 
 
+def test_report_page_opts_into_the_print_stylesheet():
+    response = client.post("/advise", data=_sample_form_data())
+
+    assert response.status_code == 200
+    assert 'class="printable-report"' in response.text
+    # the back link is tagged so the print rules can drop it as chrome
+    assert 'class="back-link"' in response.text
+
+
+def test_marketing_pages_do_not_opt_into_the_print_stylesheet():
+    for path in ("/", "/how-it-works", "/app"):
+        response = client.get(path)
+
+        assert response.status_code == 200
+        assert "printable-report" not in response.text
+
+
+def test_print_stylesheet_is_scoped_and_forces_black_on_white():
+    response = client.get("/static/style.css")
+
+    assert response.status_code == 200
+    css = response.text
+    assert "@media print" in css
+    print_block = css[css.index("@media print") :]
+    assert "body.printable-report" in print_block
+    # nav, footer and the engineering YAML view are chrome, not handout content
+    for selector in (".site-nav", ".site-footer", ".yaml-view", ".controls"):
+        assert selector in print_block
+    assert "break-inside: avoid" in print_block
+
+
 # ---------- Play Mode ----------
 
 
@@ -233,6 +264,16 @@ def test_play_round_shows_ranking_for_in_progress_session(monkeypatch, tmp_path)
     assert "Take this action" in response.text
     assert "Enemy intelligence" in response.text
     assert "Orc Raider" in response.text
+
+
+def test_play_round_page_opts_into_the_print_stylesheet(monkeypatch, tmp_path):
+    _isolated_scenarios_dir(monkeypatch, tmp_path)
+    monkeypatch.setenv("TACTICALDIRECTOR_SESSION_DIR", str(tmp_path / "sessions"))
+
+    response = client.post("/play/start", data={"scenario": "broken_bridge_ambush", "seed": "1"})
+
+    assert response.status_code == 200
+    assert 'class="printable-report"' in response.text
 
 
 def test_play_round_returns_404_for_unknown_session(monkeypatch, tmp_path):

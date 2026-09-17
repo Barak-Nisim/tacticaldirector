@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="/static/style.css">
   <script>document.documentElement.classList.remove("no-js");</script>
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
   <header class="site-nav">
     <a href="/" class="brand">
       <svg class="logo-mark" viewBox="0 0 48 48" width="26" height="26" aria-hidden="true">

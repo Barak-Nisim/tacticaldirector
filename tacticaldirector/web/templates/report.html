@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block title %}TacticalDirector Report: {{ result.encounter.character.name }}{% endblock %}
+{% block body_class %}printable-report{% endblock %}
 {% block content %}
 <div class="container">
-  <p><a href="/app">&larr; Back to demo</a></p>
+  <p class="back-link"><a href="/app">&larr; Back to demo</a></p>
 
   <div class="report-card">
     <h1>The Codex Speaks</h1>
